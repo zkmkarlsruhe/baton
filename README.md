@@ -60,6 +60,12 @@ To configure the send/receive address and ports, see the commandline argument he
 
     ./baton.py -h
 
+Defaults are:
+
+* websocket: ws://localhost:8081
+* udp recv: localhost 9999
+* udp send: localhost 8888
+
 To stop baton, use CTRL+C to issue an interrupt signal. You need to do this a couple of times until it exits completely.
 
 When finished, deactivate the virtual environment with:
@@ -67,7 +73,7 @@ When finished, deactivate the virtual environment with:
     deactivate
 
 Example Clients
-------------
+---------------
 
 A couple of example clients are included:
 
@@ -78,7 +84,7 @@ Both examples should work together with the default address & ports on the same 
 
     pd/client.pd <-UDP-> baton.py <-WS-> html/client/index.html
 
-First start baton, then start the clients.
+First start baton, then start the clients. If the html client was started first, reload the page to restablish the connection.
 
 To connect clients running on different computers, you may need to change the websocket and/or UDP address and port values.
 

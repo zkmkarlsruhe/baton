@@ -9,14 +9,14 @@
 -1 0 1;
 #X obj 352 144 oscformat /foo;
 #X msg 352 113 list bar 1 2 3;
-#X msg 85 115 listen 9990 239.200.200.200;
-#X msg 38 82 listen 9990;
+#X msg 85 115 listen 8888 239.200.200.200;
+#X msg 38 82 listen 8888;
 #X text 255 140 multicast;
 #X text 63 49 receive;
 #X text 355 46 send;
 #X msg 494 131 connect 239.200.200.200 6001;
 #X text 707 122 multicast;
-#X msg 482 84 connect localhost 6000;
+#X msg 482 84 connect localhost 9999;
 #X text 21 9 send/recv OSC messages over UDP;
 #X connect 0 0 1 0;
 #X connect 2 0 3 0;

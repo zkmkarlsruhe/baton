@@ -33,13 +33,13 @@ parser.add_argument(
     default="localhost", help="udp receive addr, default: localhost")
 parser.add_argument(
     "--recvport", action="store", dest="recvport",
-    default=6000, type=int, help="udp receive port, default: 6000")
+    default=9999, type=int, help="udp receive port, default: 9999")
 parser.add_argument(
     "--sendaddr", action="store", dest="sendaddr",
     default='localhost', help="udp send port, default: localhost")
 parser.add_argument(
     "--sendport", action="store", dest="sendport",
-    default=9990, type=int, help="udp send addr, default: 9990")
+    default=8888, type=int, help="udp send addr, default: 8888")
 
 ##### UDP
 
@@ -73,7 +73,7 @@ class UDPReceiver(object):
             data, addr = self._sock.recvfrom(1024)
             #print("udp: received ", data)
             for client in wsserver.connections:
-                print(wsserver.connections[client], "sending")
+                #print(wsserver.connections[client], "sending")
                 wsserver.connections[client].sendMessage(data)
 
 ##### WebSocket
