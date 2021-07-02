@@ -66,6 +66,8 @@ Defaults are:
 * udp recv: localhost 9999
 * udp send: localhost 8888
 
+_Note: To connect external devices to the machine running baton, "localhost" cannot be used and only clients running on the same machine will be able to connect. Use the network IP address or local DNS hostname instead for baton and both local and remote clients, ie. 192.168.0.101, etc._ 
+
 To stop baton, use CTRL+C to issue an interrupt signal. You need to do this a couple of times until it exits completely.
 
 When finished, deactivate the virtual environment with:

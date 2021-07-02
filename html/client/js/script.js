@@ -2,8 +2,14 @@
 
 // ----- OSC -----
 
+// use localhost when only connecting internally
+let host = "localhost"
+
+// use the server machine's IP address when connecting external devices
+//let host = "10.10.0.159"
+
 let oscPort = new osc.WebSocketPort({
-    url: "ws://localhost:8081",
+    url: "ws://"+host+":8081",
     metadata: true
 })
 
