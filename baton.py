@@ -7,17 +7,13 @@
 # For information on usage and redistribution, and for a DISCLAIMER OF ALL
 # WARRANTIES, see the file, "LICENSE.txt," in this distribution.
 #
-# This code has been developed at ZKM | Hertz-Lab as part of „The Intelligent 
+# This code has been developed at ZKM | Hertz-Lab as part of „The Intelligent
 # Museum“ generously funded by the German Federal Cultural Foundation.
-#
-# TODO:
-# * add signal handler to exit gracefully? probably needs nonblocking io...
-# * verbose event messaging instead of commenting print() out
-# * replace SimpleWebSocketServer with websockets lib?
-# * replace UDP code with asyncio versions
 
-from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
-import socket, threading, argparse
+import asyncio
+import websockets
+import signal
+import argparse
 
 ##### parser
 
@@ -30,89 +26,180 @@ parser.add_argument(
     default=8081, type=int, help="websocket port ie. ws://localhost:####, default: 8081")
 parser.add_argument(
     "--recvaddr", action="store", dest="recvaddr",
-    default="localhost", help="udp receive addr, default: localhost")
+    default="127.0.0.1", help="udp receive addr, default: 127.0.0.1")
 parser.add_argument(
     "--recvport", action="store", dest="recvport",
     default=9999, type=int, help="udp receive port, default: 9999")
 parser.add_argument(
     "--sendaddr", action="store", dest="sendaddr",
-    default='localhost', help="udp send port, default: localhost")
+    default="127.0.0.1", help="udp send port, default: 127.0.0.1")
 parser.add_argument(
     "--sendport", action="store", dest="sendport",
     default=8888, type=int, help="udp send addr, default: 8888")
+parser.add_argument("-v", "--verbose", action="store_true", dest="verbose",
+    help="enable verbose printing")
 
 ##### UDP
 
-# simple UDP sender socket wrapper
-class UDPSender(object):
+# simple UDP sender asyncio protocol
+class UDPSender:
 
-    # init with address, port, and optional brodcast (aka multicast)
-    def __init__(self, address, port, broadcast=False):
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.setblocking(0)
-        if broadcast:
-            self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.address = address
-        self.port = port
+    @staticmethod
+    def create(loop, remote_addr, verbose):
+        task = asyncio.Task(loop.create_datagram_endpoint(
+            lambda: UDPSender(verbose=verbose),
+            remote_addr=remote_addr, allow_broadcast=True))
+        _, udpsender = loop.run_until_complete(task)
+        return udpsender
 
-    # send raw data 
+    def __init__(self, verbose=True):
+        self.transport = None
+        self.verbose = verbose # verbosity
+
+    def close(self):
+        self.transport.close()
+
     def send(self, data):
-        self._sock.sendto(data, (self.address, self.port))
+        self.transport.sendto(data)
+        if self.verbose:
+            print(f"udp sender: sent {data}")
 
-# simple UDP receiver socket wrapper
-class UDPReceiver(object):
+    def connection_made(self, transport):
+        self.transport = transport
+        if self.verbose:
+            print(f"udp sender: connected")
 
-    def __init__(self, port, address="localhost"):
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.bind((address, port))
-        self.running = True
+    def connection_lost(self, exc):
+        if self.verbose:
+            print("udp sender: disconnected, error:", exc)
 
-    def listenforever(self, wsserver):
-        print("udp: starting")
-        while self.running:
-            data, addr = self._sock.recvfrom(1024)
-            #print("udp: received ", data)
-            for client in wsserver.connections:
-                #print(wsserver.connections[client], "sending")
-                wsserver.connections[client].sendMessage(data)
+# simple UDP receiver asyncio protocol
+class UDPReceiver:
 
-##### WebSocket
+    @staticmethod
+    def create(loop, local_addr, server, verbose):
+        task = asyncio.Task(loop.create_datagram_endpoint(
+            lambda: UDPReceiver(server=server, verbose=verbose),
+            local_addr=local_addr, allow_broadcast=True))
+        _, udpreceiver = loop.run_until_complete(task)
+        return udpreceiver
 
-# websocket -> UDP relay implementation
-class WSServer(WebSocket):
+    def __init__(self, loop=None, server=None, verbose=True):
+        self.transport = None
+        self.server = server   # websocket server
+        self.verbose = verbose # verbosity
 
-    # setup UDP sender object
-    def __init__(self, server, sock, address):
-        WebSocket.__init__(self, server, sock, address)
-        self.udpsender = UDPSender(args.sendaddr, args.sendport)
+    def close(self):
+        self.transport.close()
 
-    # client connect callback
-    def handleConnected(self):
-        print("websocket: connected", self.address)
+    def connection_made(self, transport):
+        self.transport = transport
+        if self.verbose:
+            sockname = transport.get_extra_info("sockname")
+            print(f"udp receiver: connected {sockname}")
 
-    # simply relay raw messages to UDP client
-    def handleMessage(self):
-        #print("websocket: received ", self.data)
-        self.udpsender.send(self.data)
+    # relay raw datagrams to websocket clients
+    def datagram_received(self, data, addr):
+        if self.verbose:
+            print(f"udp receiver: received {data} from {addr}")
+        _ = asyncio.create_task(WebSocketRelayServer.send(data))
 
-    # client disconnect callback
-    def handleClose(self):
-        print("websocket: disconnected", self.address)
+    def connection_lost(self, exc):
+        if self.verbose:
+            print(f"udp receiver: disconnected, error: {exc}")
+
+##### websocket
+
+# lazy static class wrapper as websockets.serve only takes a function for ws_handler,
+# quicker than figuring out how to implement a custom WebSocketServerProtocol
+class WebSocketRelayServer:
+
+    clients = set() # connected clients
+    sender = None   # udp sender
+    verbose = False # verbosity
+
+    @staticmethod
+    def create(loop, addr, sender, verbose=False):
+        host, port = addr
+        task = websockets.serve(ws_handler=WebSocketRelayServer.relay, host=host, port=port)
+        server = loop.run_until_complete(task)
+        WebSocketRelayServer.sender = sender
+        WebSocketRelayServer.verbose = verbose
+        if verbose:
+            print(f"websocket: connected {addr}")
+        return server
+
+    @staticmethod
+    async def register(websocket):
+        WebSocketRelayServer.clients.add(websocket)
+        if WebSocketRelayServer.verbose:
+            print("websocket: client connected", websocket)
+
+    @staticmethod
+    async def unregister(websocket):
+        WebSocketRelayServer.clients.remove(websocket)
+        if WebSocketRelayServer.verbose:
+            print("websocket: client disconnected", websocket)
+
+    # send data to all connected clients
+    @staticmethod
+    async def send(data):
+        if len(WebSocketRelayServer.clients) > 0:
+            tasks = []
+            for websocket in WebSocketRelayServer.clients:
+                tasks.append(asyncio.create_task(websocket.send(data)))
+            await asyncio.wait(tasks)
+
+    # relay raw websocket messages to UDP sender
+    @staticmethod
+    async def relay(websocket, path):
+        await WebSocketRelayServer.register(websocket)
+        try:
+            async for data in websocket:
+                if WebSocketRelayServer.verbose:
+                    print(f"websocket: received {data}")
+                if WebSocketRelayServer.sender is not None:
+                    WebSocketRelayServer.sender.send(data)
+        except Exception as exc:
+            # ignore "normal" disconnects, from websockets/exceptions.py:
+            # 1000 "OK"
+            # 1006 "connection closed abnormally [internal]"
+            if exc.code != 1000 and exc != 1006:
+                print(f"websocket: read error: {exc}")
+        finally:
+            await WebSocketRelayServer.unregister(websocket)
+
+##### signal
+
+# signal handler for nice exit
+def sigint_handler():
+    print("\ncaught signal, exiting...")
+    asyncio.get_running_loop().stop()
 
 ##### GO
 
+# parse
 args = parser.parse_args()
 print(f"send -> udp {args.recvaddr}:{args.recvport} -> ws://{args.wshost}:{args.wsport}")
 print(f"recv <- udp {args.sendaddr}:{args.sendport} <- ws://{args.wshost}:{args.wsport}")
 
+# set up event loop
+loop = asyncio.get_event_loop()
+loop.add_signal_handler(signal.SIGINT, sigint_handler)
+
+# udp sender
+udpsender = UDPSender.create(loop, remote_addr=(args.sendaddr, args.sendport), verbose=args.verbose)
+
 # websocket server
-wsserver = SimpleWebSocketServer(args.wshost, args.wsport, WSServer)
+relayserver = WebSocketRelayServer.create(loop, addr=(args.wshost, args.wsport), sender=udpsender, verbose=args.verbose)
 
-# UDP server
-udpserver = UDPReceiver(args.recvport, args.recvaddr)
-def listenUDP():
-    udpserver.listenforever(wsserver)
-threading.Thread(target=listenUDP).start()
+# udp receiver
+udpreceiver = UDPReceiver.create(loop, local_addr=(args.recvaddr, args.recvport), server=relayserver, verbose=args.verbose)
 
-print("websocket: starting")
-wsserver.serveforever()
+# run forever
+try:
+    loop.run_forever()
+finally:
+    udpsender.close()
+    udpreceiver.close()
+    relayserver.close()

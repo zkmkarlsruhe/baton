@@ -1,4 +1,4 @@
-#N canvas 417 265 806 318 12;
+#N canvas 634 126 806 318 12;
 #X obj 85 221 oscparse;
 #X obj 85 253 print;
 #X msg 108 154 listen 0;
@@ -6,7 +6,7 @@
 #X obj 482 222 netsend -u -b;
 #X msg 536 175 disconnect;
 #X obj 482 266 tgl 15 0 empty empty connected? 17 7 0 10 -262144 -1
--1 0 1;
+-1 1 1;
 #X obj 352 144 oscformat /foo;
 #X msg 352 113 list bar 1 2 3;
 #X msg 85 115 listen 8888 239.200.200.200;
@@ -16,8 +16,10 @@
 #X text 355 46 send;
 #X msg 494 131 connect 239.200.200.200 6001;
 #X text 707 122 multicast;
-#X msg 482 84 connect localhost 9999;
 #X text 21 9 send/recv OSC messages over UDP;
+#X msg 346 193 1 2 3 4;
+#X msg 322 84 list baz 4 5 6;
+#X msg 482 84 connect localhost 9999;
 #X connect 0 0 1 0;
 #X connect 2 0 3 0;
 #X connect 3 0 0 0;
@@ -28,4 +30,6 @@
 #X connect 9 0 3 0;
 #X connect 10 0 3 0;
 #X connect 14 0 4 0;
-#X connect 16 0 4 0;
+#X connect 17 0 4 0;
+#X connect 18 0 7 0;
+#X connect 19 0 4 0;
