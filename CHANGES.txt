@@ -1,3 +1,9 @@
+0.2.0: 2021 Aug 02
+
+* reimplemented using asyncio and websockets library
+* added verbose printing commandline flag
+* now exits cleanly via signal handler
+
 0.1.0: 2021 Jul 01
 
 initial version from IM team hackathon

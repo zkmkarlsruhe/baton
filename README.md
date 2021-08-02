@@ -19,7 +19,7 @@ Dependencies
 ------------
 
   * Python 3
-  * [simple-websocket-server](https://github.com/dpallot/simple-websocket-server)
+  * [websockets library](https://github.com/aaugustin/websockets)
 
 Setup
 -----
@@ -37,10 +37,10 @@ python3 -m venv venv-baton
 source venv-baton/bin/activate
 ```
 
-Install the websocket server library via pip:
+Install the websockets library via pip:
 
 ```shell
-pip3 install git+https://github.com/dpallot/simple-websocket-server.git
+pip3 install git+https://github.com/aaugustin/websockets.git
 ```
 
 Running
@@ -63,8 +63,8 @@ To configure the send/receive address and ports, see the commandline argument he
 Defaults are:
 
 * websocket: ws://localhost:8081
-* udp recv: localhost 9999
-* udp send: localhost 8888
+* udp recv: 127.0.0.1 9999
+* udp send: 127.0.0.1 8888
 
 _Note: To connect external devices to the machine running baton, "localhost" cannot be used and only clients running on the same machine will be able to connect. Use the network IP address or local DNS hostname instead for baton and both local and remote clients, ie. 192.168.0.101, etc._ 
 
