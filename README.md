@@ -24,7 +24,7 @@ Dependencies
 Setup
 -----
 
-Install Python 3, if not already available:
+Install Python 3, if not already available. For instance, on macOS using [Homebrew](http://brew.sh):
 
 ```shell
 brew install python3
