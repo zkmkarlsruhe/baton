@@ -30,35 +30,24 @@ Install Python 3, if not already available. For instance, on macOS using [Homebr
 brew install python3
 ```
 
-Create a virtual environment for the script's dependencies and activate it:
+Create a virtual environment and install the script's dependencies:
 
 ```shell
-python3 -m venv venv-baton
-source venv-baton/bin/activate
-```
-
-Install the websockets library via pip:
-
-```shell
-pip3 install git+https://github.com/aaugustin/websockets.git
+make
 ```
 
 Running
 -------
 
-Make sure to activate the virtual environment before the first run in a new commandline session:
+Next, start the server on the commandline via the virtual environment wrapper script:
 
-    source venv-baton/bin/activate
-
-Next, start the server on the commandline via:
-
-    ./baton.py
+    ./baton
 
 It can simply sit in the background and automatically handles the websocket connection. Websocket clients can then connect to send/receive messages whiel baton is active.
 
 To configure the send/receive address and ports, see the commandline argument help for baton by running:
 
-    ./baton.py -h
+    ./baton -h
 
 Defaults are:
 
@@ -69,6 +58,14 @@ Defaults are:
 _Note: To connect external devices to the machine running baton, "localhost" cannot be used and only clients running on the same machine will be able to connect. Use the network IP address or local DNS hostname instead for baton and both local and remote clients, ie. 192.168.0.101, etc._ 
 
 To stop baton, use CTRL+C to issue an interrupt signal.
+
+### Calling Python script directly
+
+The Python script can be called directly without the wrapper script, but requires manually enabling or disabling the virtual environment:
+
+Aactivate the virtual environment before the first run in a new commandline session:
+
+    source venv-baton/bin/activate
 
 When finished, deactivate the virtual environment with:
 
