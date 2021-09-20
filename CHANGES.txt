@@ -1,3 +1,7 @@
+0.3.1: 2021 Sep 20
+
+* fix addr/port mixup in help 
+
 0.3.0: 2021 Sep 20
 
 * added makefile to handle venv setup

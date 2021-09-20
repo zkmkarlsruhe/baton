@@ -32,10 +32,10 @@ parser.add_argument(
     default=9999, type=int, help="udp receive port, default: 9999")
 parser.add_argument(
     "--sendaddr", action="store", dest="sendaddr",
-    default="127.0.0.1", help="udp send port, default: 127.0.0.1")
+    default="127.0.0.1", help="udp send addr, default: 127.0.0.1")
 parser.add_argument(
     "--sendport", action="store", dest="sendport",
-    default=8888, type=int, help="udp send addr, default: 8888")
+    default=8888, type=int, help="udp send port, default: 8888")
 parser.add_argument("-v", "--verbose", action="store_true", dest="verbose",
     help="enable verbose printing")
 
