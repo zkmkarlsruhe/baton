@@ -67,6 +67,10 @@ Aactivate the virtual environment before the first run in a new commandline sess
 
     source venv-baton/bin/activate
 
+Use:
+
+    ./baton.py -h
+
 When finished, deactivate the virtual environment with:
 
     deactivate
