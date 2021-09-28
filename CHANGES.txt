@@ -1,3 +1,8 @@
+0.3.2: 2021 Sep 28
+
+* fix read error 1006 not being caught
+* now print error code on read error
+
 0.3.1: 2021 Sep 20
 
 * fix addr/port mixup in help 
