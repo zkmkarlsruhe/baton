@@ -164,8 +164,8 @@ class WebSocketRelayServer:
             # ignore "normal" disconnects, from websockets/exceptions.py:
             # 1000 "OK"
             # 1006 "connection closed abnormally [internal]"
-            if exc.code != 1000 and exc != 1006:
-                print(f"websocket: read error: {exc}")
+            if exc.code != 1000 and exc.code != 1006:
+                print(f"websocket: read error: {exc.code} {exc}")
         finally:
             await WebSocketRelayServer.unregister(websocket)
 
