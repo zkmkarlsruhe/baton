@@ -10,9 +10,7 @@
 # This code has been developed at ZKM | Hertz-Lab as part of „The Intelligent
 # Museum“ generously funded by the German Federal Cultural Foundation.
 
-NAME = baton
-
-VENV = venv-$(NAME)
+VENV = venv
 VBIN = $(VENV)/bin
 
 PYTHON := python3

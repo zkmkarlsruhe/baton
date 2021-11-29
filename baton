@@ -13,7 +13,8 @@
 # Museum“ generously funded by the German Federal Cultural Foundation.
 
 DIR="$(dirname $0)"
+SCRIPT=baton.py
 
-source "$DIR"/venv-baton/bin/activate
-"$DIR"/baton.py $@
+. "$DIR"/venv/bin/activate
+"$DIR"/$SCRIPT $@
 deactivate

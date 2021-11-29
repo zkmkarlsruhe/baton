@@ -18,8 +18,8 @@ This script acts as a websocket relay server which creates a local websocket and
 Dependencies
 ------------
 
-  * Python 3
-  * [websockets library](https://github.com/aaugustin/websockets)
+* Python 3
+* [websockets library](https://github.com/aaugustin/websockets)
 
 Setup
 -----
@@ -65,7 +65,7 @@ The Python script can be called directly without the wrapper script, but require
 
 Aactivate the virtual environment before the first run in a new commandline session:
 
-    source venv-baton/bin/activate
+    source venv/bin/activate
 
 Use:
 
