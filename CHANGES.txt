@@ -1,3 +1,8 @@
+0.3.3: 2022 Feb 21
+
+* fixed run script not working in non-bash shells
+* prefer simpler venv naming
+
 0.3.2: 2021 Sep 28
 
 * fix read error 1006 not being caught
