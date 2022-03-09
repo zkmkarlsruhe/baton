@@ -43,7 +43,7 @@ Next, start the server on the commandline via the virtual environment wrapper sc
 
     ./baton
 
-It can simply sit in the background and automatically handles the websocket connection. Websocket clients can then connect to send/receive messages whiel baton is active.
+It can simply sit in the background and automatically handles the websocket connection. Websocket clients can then connect to send/receive messages while baton is active.
 
 To configure the send/receive address and ports, see the commandline argument help for baton by running:
 
@@ -87,7 +87,7 @@ Both examples should work together with the default address & ports on the same 
 
     pd/client.pd <-UDP-> baton.py <-WS-> html/client/index.html
 
-First start baton, then start the clients. If the html client was started first, reload the page to restablish the connection.
+First start baton, then start the clients. If the html client was started first, reload the page to reestablish the connection.
 
 To connect clients running on different computers, you may need to change the websocket and/or UDP address and port values.
 
