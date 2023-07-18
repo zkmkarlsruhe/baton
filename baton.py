@@ -183,7 +183,8 @@ print(f"send -> udp {args.recvaddr}:{args.recvport} -> ws://{args.wshost}:{args.
 print(f"recv <- udp {args.sendaddr}:{args.sendport} <- ws://{args.wshost}:{args.wsport}")
 
 # set up event loop
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 loop.add_signal_handler(signal.SIGINT, sigint_handler)
 
 # udp sender
